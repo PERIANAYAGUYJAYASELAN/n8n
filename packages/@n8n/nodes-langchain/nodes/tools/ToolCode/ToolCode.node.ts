@@ -5,6 +5,7 @@ import type { JSONSchema7 } from 'json-schema';
 import { JavaScriptSandbox } from 'n8n-nodes-base/dist/nodes/Code/JavaScriptSandbox';
 import { JsTaskRunnerSandbox } from 'n8n-nodes-base/dist/nodes/Code/JsTaskRunnerSandbox';
 import { PythonSandbox } from 'n8n-nodes-base/dist/nodes/Code/PythonSandbox';
+import { PythonTaskRunnerSandbox } from 'n8n-nodes-base/dist/nodes/Code/PythonTaskRunnerSandbox';
 import type { Sandbox } from 'n8n-nodes-base/dist/nodes/Code/Sandbox';
 import { getSandboxContext } from 'n8n-nodes-base/dist/nodes/Code/Sandbox';
 import type {
@@ -107,6 +108,18 @@ function getTool(
 				workflowMode,
 				ctx,
 				undefined,
+				{
+					query,
+				},
+			);
+			const executionData = await sandbox.runCodeForTool();
+			return executionData;
+		} else if (language === 'python' && isRunnerEnabled) {
+			const sandbox = new PythonTaskRunnerSandbox(
+				code,
+				'runOnceForAllItems',
+				workflowMode,
+				ctx as IExecuteFunctions,
 				{
 					query,
 				},

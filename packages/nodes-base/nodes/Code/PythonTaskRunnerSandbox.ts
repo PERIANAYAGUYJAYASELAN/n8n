@@ -19,6 +19,7 @@ export class PythonTaskRunnerSandbox {
 		private readonly nodeMode: CodeExecutionMode,
 		private readonly workflowMode: WorkflowExecuteMode,
 		private readonly executeFunctions: IExecuteFunctions,
+		private readonly additionalProperties: Record<string, unknown> = {},
 	) {}
 
 	/**
@@ -44,6 +45,7 @@ export class PythonTaskRunnerSandbox {
 			nodeName: node.name,
 			workflowId: workflow.id,
 			workflowName: workflow.name,
+			additionalProperties: this.additionalProperties,
 		};
 
 		const executionResult = await this.executeFunctions.startJob<INodeExecutionData[]>(
@@ -72,5 +74,36 @@ export class PythonTaskRunnerSandbox {
 				this.executeFunctions.helpers.normalizeItems.bind(this.executeFunctions.helpers),
 			),
 		);
+	}
+
+	async runCodeForTool(): Promise<unknown> {
+		const itemIndex = 0;
+
+		const node = this.executeFunctions.getNode();
+		const workflow = this.executeFunctions.getWorkflow();
+
+		const taskSettings: Record<string, unknown> = {
+			code: this.pythonCode,
+			nodeMode: this.nodeMode,
+			workflowMode: this.workflowMode,
+			continueOnFail: this.executeFunctions.continueOnFail(),
+			nodeId: node.id,
+			nodeName: node.name,
+			workflowId: workflow.id,
+			workflowName: workflow.name,
+			additionalProperties: this.additionalProperties,
+		};
+
+		const executionResult = await this.executeFunctions.startJob(
+			'python',
+			taskSettings,
+			itemIndex,
+		);
+
+		if (!executionResult.ok) {
+			throwExecutionError('error' in executionResult ? executionResult.error : {});
+		}
+
+		return executionResult.result;
 	}
 }

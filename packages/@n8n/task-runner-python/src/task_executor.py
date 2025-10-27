@@ -51,6 +51,7 @@ class TaskExecutor:
         node_mode: NodeMode,
         items: Items,
         security_config: SecurityConfig,
+        additional_properties: dict[str, Any] | None = None,
     ):
         """Create a subprocess for executing a Python code task and a queue for communication."""
 
@@ -68,6 +69,7 @@ class TaskExecutor:
                 items,
                 queue,
                 security_config,
+                additional_properties or {},
             ),
         )
 
@@ -171,6 +173,7 @@ class TaskExecutor:
         items: Items,
         queue: multiprocessing.Queue,
         security_config: SecurityConfig,
+        additional_properties: dict[str, Any],
     ):
         """Execute a Python code task in all-items mode."""
 
@@ -189,6 +192,7 @@ class TaskExecutor:
                 "__builtins__": TaskExecutor._filter_builtins(security_config),
                 "_items": items,
                 "print": TaskExecutor._create_custom_print(print_args),
+                **additional_properties,
             }
 
             exec(compiled_code, globals)
@@ -205,6 +209,7 @@ class TaskExecutor:
         items: Items,
         queue: multiprocessing.Queue,
         security_config: SecurityConfig,
+        additional_properties: dict[str, Any],
     ):
         """Execute a Python code task in per-item mode."""
 
@@ -228,6 +233,7 @@ class TaskExecutor:
                     "__builtins__": filtered_builtins,
                     "_item": item,
                     "print": custom_print,
+                    **additional_properties,
                 }
 
                 exec(compiled_code, globals)

@@ -43,6 +43,7 @@ class TaskSettings:
     workflow_id: str
     node_name: str
     node_id: str
+    additional_properties: dict[str, Any] | None = None
 
 
 @dataclass
